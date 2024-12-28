@@ -4,8 +4,6 @@ spring:
     username: root
     password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
-  profiles:
-    active: generate-schema
   jpa:
     hibernate:
       ddl-auto: update
@@ -20,3 +18,8 @@ spring:
       enabled: false
     jdbc:
       initialize-schema: ALWAYS
+
+#batch app config
+app:
+  batch:
+    size: 100

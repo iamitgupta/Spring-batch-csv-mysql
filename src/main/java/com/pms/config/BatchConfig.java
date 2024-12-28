@@ -2,6 +2,7 @@ package com.pms.config;
 
 import com.pms.entity.Product;
 import com.pms.repository.ProductRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
@@ -17,6 +18,7 @@ import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
 import org.springframework.batch.item.file.mapping.DefaultLineMapper;
 import org.springframework.batch.item.file.transform.DelimitedLineTokenizer;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -26,17 +28,16 @@ import org.springframework.transaction.PlatformTransactionManager;
 @Configuration
 @EnableBatchProcessing
 @EnableScheduling
+@Slf4j
 public class BatchConfig {
 
-    private static final Logger logger = LoggerFactory.getLogger(BatchConfig.class);
-    private static final int BATCH_SIZE = 100;
-    private final JobLauncher jobLauncher;
+    @Value("${app.batch.size}")
+    private int BATCH_SIZE;
     private final JobRepository jobRepository;
     private final PlatformTransactionManager batchTransactionManager;
     private final ProductRepository productRepository;
 
-    public BatchConfig(JobLauncher jobLauncher, JobRepository jobRepository, PlatformTransactionManager batchTransactionManager, ProductRepository productRepository) {
-        this.jobLauncher = jobLauncher;
+    public BatchConfig(JobRepository jobRepository, PlatformTransactionManager batchTransactionManager, ProductRepository productRepository) {
         this.jobRepository = jobRepository;
         this.batchTransactionManager = batchTransactionManager;
         this.productRepository = productRepository;
@@ -70,7 +71,7 @@ public class BatchConfig {
     @Bean
     public ItemWriter<Product> databaseWriter() {
         return items -> {
-            logger.info("Writing {} products to DB", items.size());
+            log.info("Writing {} products to DB", items.size());
             productRepository.saveAllAndFlush(items);
         };
     }
